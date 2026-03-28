@@ -1,198 +1,193 @@
-// تحميل البيانات من localStorage
-let habits = JSON.parse(localStorage.getItem('habits')) || [];
+let habits = JSON.parse(localStorage.getItem('hf2') || '[]');
+let selColor = '#22c55e';
+let dragId = null;
 
-// عند تحميل الصفحة
-window.onload = function() {
-    renderBoard();
-    updateReport();
-};
+// COLOR PICKER
+document.querySelectorAll('.color-dot').forEach(d => {
+  d.addEventListener('click', () => {
+    document.querySelectorAll('.color-dot').forEach(x => x.classList.remove('sel'));
+    d.classList.add('sel');
+    selColor = d.dataset.color;
+  });
+});
 
-// إضافة عادة جديدة
+// ADD HABIT (Task 1)
 function addHabit() {
-    const name = document.getElementById('habitName').value;
-    const frequency = document.getElementById('habitFrequency').value;
-    
-    if (!name.trim()) {
-        alert('الرجاء إدخال اسم العادة');
-        return;
+  const nameEl = document.getElementById('habit-name');
+  const name = nameEl.value.trim();
+  if (!name) {
+    nameEl.style.borderColor = 'var(--red)';
+    setTimeout(() => nameEl.style.borderColor = '', 900);
+    return;
+  }
+  habits.push({
+    id: Date.now().toString(),
+    name,
+    freq: document.getElementById('habit-freq').value,
+    color: selColor,
+    col: 'backlog'
+  });
+  save();
+  render();
+  nameEl.value = '';
+}
+
+document.getElementById('habit-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addHabit();
+});
+
+// DRAG (Task 3)
+function dragStart(e, id) {
+  dragId = id;
+  setTimeout(() => {
+    const el = document.getElementById('c' + id);
+    if (el) el.classList.add('dragging');
+  }, 0);
+}
+
+function dragEnd(id) {
+  const el = document.getElementById('c' + id);
+  if (el) el.classList.remove('dragging');
+  document.querySelectorAll('.col-body').forEach(c => c.classList.remove('over'));
+}
+
+function drop(e, col) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('over');
+  if (!dragId) return;
+  
+  // WIP LIMIT CHECK
+  if (col === 'doing' && habits.filter(h => h.col === 'doing').length >= 3) {
+    showToast();
+    return;
+  }
+  
+  const h = habits.find(h => h.id === dragId);
+  if (h) h.col = col;
+  save();
+  render();
+  dragId = null;
+}
+
+// MOVE BUTTONS (Task 3)
+function moveNext(id) {
+  const h = habits.find(h => h.id === id);
+  if (!h) return;
+  
+  if (h.col === 'backlog') {
+    if (habits.filter(x => x.col === 'doing').length >= 3) {
+      showToast();
+      return;
     }
-    
-    const newHabit = {
-        id: Date.now(),
-        name: name,
-        frequency: frequency,
-        status: 'todo', // todo, doing, done
-        createdAt: new Date().toISOString(),
-        completedAt: null
-    };
-    
-    habits.push(newHabit);
-    saveAndRender();
-    
-    // مسح الحقول
-    document.getElementById('habitName').value = '';
+    h.col = 'doing';
+  } else if (h.col === 'doing') {
+    h.col = 'done';
+  }
+  save();
+  render();
 }
 
-// حفظ وعرض
-function saveAndRender() {
-    localStorage.setItem('habits', JSON.stringify(habits));
-    renderBoard();
-    updateReport();
+function moveBack(id) {
+  const h = habits.find(h => h.id === id);
+  if (!h) return;
+  
+  if (h.col === 'done') {
+    h.col = 'doing';
+  } else if (h.col === 'doing') {
+    h.col = 'backlog';
+  }
+  save();
+  render();
 }
 
-// عرض اللوحة
-function renderBoard() {
-    const todoCards = document.getElementById('todo-cards');
-    const doingCards = document.getElementById('doing-cards');
-    const doneCards = document.getElementById('done-cards');
+function del(id) {
+  habits = habits.filter(h => h.id !== id);
+  save();
+  render();
+}
+
+// RENDER (Tasks 2 & 4)
+function render() {
+  const cols = { backlog: [], doing: [], done: [] };
+  habits.forEach(h => cols[h.col].push(h));
+
+  ['backlog', 'doing', 'done'].forEach(col => {
+    const body = document.getElementById('col-' + col);
+    const emp = document.getElementById('emp-' + col);
+    document.getElementById('cnt-' + col).textContent = cols[col].length;
     
-    // تفريغ الأعمدة
-    todoCards.innerHTML = '';
-    doingCards.innerHTML = '';
-    doneCards.innerHTML = '';
-    
-    habits.forEach(habit => {
-        const card = createCard(habit);
-        
-        if (habit.status === 'todo') {
-            todoCards.appendChild(card);
-        } else if (habit.status === 'doing') {
-            doingCards.appendChild(card);
-        } else if (habit.status === 'done') {
-            doneCards.appendChild(card);
-        }
+    // Remove old cards
+    body.querySelectorAll('.habit-card').forEach(c => c.remove());
+    emp.style.display = cols[col].length === 0 ? 'block' : 'none';
+
+    cols[col].forEach(h => {
+      const card = document.createElement('div');
+      card.className = 'habit-card';
+      card.id = 'c' + h.id;
+      card.draggable = true;
+      card.innerHTML = `
+        <div class="card-stripe" style="background:${h.color}"></div>
+        <div class="card-name">${escapeHtml(h.name)}</div>
+        <div class="card-foot">
+          <span class="card-freq">${h.freq === 'يومي' ? '📅 يومي' : '📆 أسبوعي'}</span>
+          <div class="card-acts">
+            ${col !== 'done' ? `<button class="cbtn cbtn-next" onclick="moveNext('${h.id}')">${col === 'backlog' ? '▶ ابدأ' : '✅ أنجزت'}</button>` : ''}
+            ${col !== 'backlog' ? `<button class="cbtn cbtn-back" onclick="moveBack('${h.id}')">◀ رجوع</button>` : ''}
+            <button class="cbtn cbtn-del" onclick="del('${h.id}')">🗑</button>
+          </div>
+        </div>`;
+      
+      card.addEventListener('dragstart', e => dragStart(e, h.id));
+      card.addEventListener('dragend', () => dragEnd(h.id));
+      body.appendChild(card);
     });
-    
-    // التحقق من WIP Limit
-    checkWipLimit();
+  });
+
+  // Report (Task 4)
+  const total = habits.length;
+  const done = cols.done.length;
+  const doing = cols.doing.length;
+  const back = cols.backlog.length;
+  const pct = total === 0 ? 0 : Math.round(done / total * 100);
+
+  document.getElementById('r-total').textContent = total;
+  document.getElementById('r-done').textContent = done;
+  document.getElementById('r-doing').textContent = doing;
+  document.getElementById('r-backlog').textContent = back;
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('h-total').textContent = total;
+  document.getElementById('h-done').textContent = done;
+  document.getElementById('h-pending').textContent = back;
+
+  // Mini list
+  const ml = document.getElementById('mini-list');
+  ml.innerHTML = habits.length === 0
+    ? '<p style="color:var(--text-muted);font-size:12px;text-align:center">لا توجد عادات بعد</p>'
+    : habits.map(h => `
+      <div class="habit-mini">
+        <div class="dot-mini" style="background:${h.color}"></div>
+        <span>${escapeHtml(h.name)}</span>
+        <span class="badge-freq">${h.freq}</span>
+      </div>`).join('');
 }
 
-// إنشاء بطاقة عادة
-function createCard(habit) {
-    const card = document.createElement('div');
-    card.className = `habit-card ${habit.frequency}`;
-    card.draggable = true;
-    card.setAttribute('data-id', habit.id);
-    
-    card.innerHTML = `
-        <div class="habit-name">${habit.name}</div>
-        <div class="habit-frequency">${habit.frequency === 'daily' ? '📅 يومي' : '📆 أسبوعي'}</div>
-    `;
-    
-    // إضافة أحداث السحب والإفلات
-    card.addEventListener('dragstart', dragStart);
-    card.addEventListener('dragend', dragEnd);
-    
-    return card;
+// Helper function to prevent XSS
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
-// متغيرات السحب والإفلات
-let draggedItem = null;
-
-function dragStart(e) {
-    draggedItem = this;
-    e.dataTransfer.setData('text/plain', this.getAttribute('data-id'));
-    this.style.opacity = '0.5';
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function dragEnd(e) {
-    this.style.opacity = '';
-    draggedItem = null;
+function save() {
+  localStorage.setItem('hf2', JSON.stringify(habits));
 }
 
-// إضافة أحداث الإفلات للأعمدة
-document.getElementById('todo-cards').addEventListener('dragover', dragOver);
-document.getElementById('doing-cards').addEventListener('dragover', dragOver);
-document.getElementById('done-cards').addEventListener('dragover', dragOver);
-
-document.getElementById('todo-cards').addEventListener('drop', drop);
-document.getElementById('doing-cards').addEventListener('drop', drop);
-document.getElementById('done-cards').addEventListener('drop', drop);
-
-function dragOver(e) {
-    e.preventDefault();
-}
-
-function drop(e) {
-    e.preventDefault();
-    const targetColumn = this.parentElement.id;
-    const habitId = parseInt(e.dataTransfer.getData('text/plain'));
-    
-    updateHabitStatus(habitId, targetColumn);
-}
-
-// تحديث حالة العادة
-function updateHabitStatus(habitId, newStatus) {
-    const habit = habits.find(h => h.id === habitId);
-    
-    if (!habit) return;
-    
-    // التحقق من WIP Limit قبل النقل إلى Doing
-    if (newStatus === 'doing') {
-        const doingCount = habits.filter(h => h.status === 'doing').length;
-        if (doingCount >= 3) {
-            alert('❌ لا يمكن إضافة المزيد! الحد الأقصى للعادات قيد التنفيذ هو 3');
-            return;
-        }
-    }
-    
-    // تحديث الحالة
-    habit.status = newStatus;
-    
-    // إذا تم الإنجاز (نقل إلى Done)
-    if (newStatus === 'done' && !habit.completedAt) {
-        habit.completedAt = new Date().toISOString();
-    }
-    
-    saveAndRender();
-}
-
-// التحقق من WIP Limit
-function checkWipLimit() {
-    const doingCount = habits.filter(h => h.status === 'doing').length;
-    const wipMessage = document.querySelector('#doing .wip-limit');
-    
-    if (doingCount >= 3) {
-        wipMessage.style.color = 'red';
-        wipMessage.style.fontWeight = 'bold';
-    } else {
-        wipMessage.style.color = '#999';
-        wipMessage.style.fontWeight = 'normal';
-    }
-}
-
-// تحديث تقرير الإنجاز اليومي
-function updateReport() {
-    const today = new Date().toDateString();
-    
-    // العادات المنجزة اليوم
-    const todayDone = habits.filter(habit => {
-        if (!habit.completedAt) return false;
-        const completedDate = new Date(habit.completedAt).toDateString();
-        return habit.status === 'done' && completedDate === today;
-    });
-    
-    const dailyCount = todayDone.length;
-    const totalHabits = habits.length;
-    const remainingCount = totalHabits - dailyCount;
-    
-    // تحديث الأرقام
-    document.getElementById('dailyCount').textContent = dailyCount;
-    document.getElementById('remainingCount').textContent = remainingCount;
-    
-    // تلوين الأرقام
-    const dailyElement = document.getElementById('dailyCount');
-    const remainingElement = document.getElementById('remainingCount');
-    
-    if (dailyCount > 0) {
-        dailyElement.style.color = '#4CAF50'; // أخضر
-    } else {
-        dailyElement.style.color = '#ff6b6b'; // أحمر
-    }
-    
-    if (remainingCount === 0) {
-        remainingElement.style.color = '#4CAF50';
-    } else {
-        remainingElement.style.color = '#ff6b6b';
-    }
-}
+// Initialize
+render();
