@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitFlow - تتبع العادات</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌱 HabitFlow</h1>
+            <h3>تتبع عاداتك اليومية</h3>
+        </header>
+
+        <!-- نموذج إضافة عادة جديدة -->
+        <div class="add-habit-form">
+            <h2>➕ إضافة عادة جديدة</h2>
+            <input type="text" id="habitName" placeholder="اسم العادة (مثال: قراءة 10 دقائق)">
+            <select id="habitFrequency">
+                <option value="daily">يومي</option>
+                <option value="weekly">أسبوعي</option>
+            </select>
+            <button onclick="addHabit()">إضافة العادة</button>
+        </div>
+
+        <!-- لوحة العادات (كانبان) -->
+        <div class="kanban-board">
+            <div class="column" id="todo">
+                <h2>📋 مطلوب</h2>
+                <div class="cards" id="todo-cards"></div>
+                <div class="wip-limit">الحد الأقصى: 3</div>
+            </div>
+            <div class="column" id="doing">
+                <h2>⚡ قيد التنفيذ</h2>
+                <div class="cards" id="doing-cards"></div>
+                <div class="wip-limit">الحد الأقصى: 3</div>
+            </div>
+            <div class="column" id="done">
+                <h2>✅ منجز</h2>
+                <div class="cards" id="done-cards"></div>
+            </div>
+        </div>
+
+        <!-- تقرير الإنجاز اليومي -->
+        <div class="daily-report">
+            <h2>📊 تقرير اليوم</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>الإنجازات اليومية</h3>
+                    <p id="dailyCount">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>المتبقي</h3>
+                    <p id="remainingCount">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
