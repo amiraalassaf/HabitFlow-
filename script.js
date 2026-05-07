@@ -162,7 +162,7 @@ function renderHabits() {
              ondragstart="dragStart(event, ${habit.id})"
              ondragend="dragEnd(event)">
             <div class="card-name">${habit.name}</div>
-            <div class="card-freq">${habit.frequency === 'يومي' ? '📅 يومي' : '📆 أسبوعي'}</div>
+            <div class="card-freq">${habit.frequency === 'يومي' ? '📅 يومي' : '📆 اسبوعي'}</div>
         </div>
     `).join('');
     
