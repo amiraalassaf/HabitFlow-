@@ -24,7 +24,7 @@ h1 {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
-/* نموذج الإضافة */
+/* ========== نموذج الإضافة (تاسك 1) ========== */
 .form-section {
     background: white;
     border-radius: 20px;
@@ -62,6 +62,7 @@ input:focus, select:focus {
     display: flex;
     gap: 10px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .color-option {
@@ -99,7 +100,7 @@ button:hover {
     opacity: 0.9;
 }
 
-/* قسم الإحصائيات */
+/* ========== قسم الإحصائيات وشريط التقدم (تاسك 5) ========== */
 .stats-section {
     background: white;
     border-radius: 20px;
@@ -159,7 +160,7 @@ button:hover {
     font-size: 14px;
 }
 
-/* لوحة Kanban */
+/* ========== لوحة Kanban (تاسك 2 و 4) ========== */
 .board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -172,6 +173,11 @@ button:hover {
     padding: 20px;
     min-height: 500px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: background 0.2s;
+}
+
+.column[dragover="true"] {
+    background: rgba(255,255,255,1);
 }
 
 .column h3 {
@@ -182,10 +188,20 @@ button:hover {
     border-bottom: 2px solid #667eea;
 }
 
+.wip-badge {
+    font-size: 12px;
+    background: #ff4757;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-right: 8px;
+}
+
 .cards {
     min-height: 400px;
 }
 
+/* ========== بطاقات العادات (مع زر الحذف - تاسك 6) ========== */
 .habit-card {
     background: white;
     border-radius: 12px;
@@ -193,11 +209,17 @@ button:hover {
     margin-bottom: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border-right: 5px solid;
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .habit-card:hover {
     transform: translateX(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.habit-card.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
 }
 
 .card-name {
@@ -209,4 +231,163 @@ button:hover {
 .card-freq {
     font-size: 12px;
     color: #666;
+    margin-bottom: 10px;
+}
+
+/* ========== أزرار التحكم (تاسك 6) ========== */
+.card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.delete-btn {
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.delete-btn:hover {
+    background: #ff6b81;
+    transform: translateY(-1px);
+}
+
+.move-btn {
+    background: #4ECDC4;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+}
+
+.move-btn:hover {
+    background: #3ba89f;
+}
+
+/* ========== Toast رسالة الخطأ (تاسك 4) ========== */
+.toast {
+    visibility: hidden;
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4757;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: bold;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.toast.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* ========== تاسك 7: Responsive Design ========== */
+@media (max-width: 900px) {
+    .board {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .column {
+        min-height: auto;
+    }
+    
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .form-section {
+        padding: 15px;
+    }
+    
+    .form-group {
+        gap: 10px;
+    }
+    
+    input, select, button {
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .color-option {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .stats-cards {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .stat-card {
+        padding: 10px;
+    }
+    
+    .stat-number {
+        font-size: 22px;
+    }
+    
+    .habit-card {
+        padding: 12px;
+    }
+    
+    .card-name {
+        font-size: 16px;
+    }
+    
+    .delete-btn, .move-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+    
+    .progress-container {
+        height: 25px;
+    }
+    
+    .progress-percent {
+        font-size: 12px;
+    }
+    
+    .toast {
+        white-space: normal;
+        text-align: center;
+        width: 90%;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .color-picker {
+        gap: 5px;
+    }
+    
+    .color-option {
+        width: 30px;
+        height: 30px;
+    }
 }
