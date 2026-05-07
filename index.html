@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HabitFlow - Drag & Drop</title>
+    <title>HabitFlow - الإحصائيات</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h1>🎯 HabitFlow - إدارة العادات</h1>
 
+        <!-- نموذج الإضافة -->
         <div class="form-section">
             <h2>➕ إضافة عادة جديدة</h2>
             <div class="form-group">
@@ -29,7 +30,35 @@
             </div>
         </div>
 
-        <!-- لوحة Kanaban مع إضافة أحداث السحب والإفلات -->
+        <!-- قسم الإحصائيات (جديد) -->
+        <div class="stats-section">
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">📊 إجمالي العادات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="doneCount">0</div>
+                    <div class="stat-label">✅ منجز</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="progressCount">0</div>
+                    <div class="stat-label">⏳ قيد التنفيذ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="todoCount">0</div>
+                    <div class="stat-label">📝 مطلوب</div>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar">
+                    <span class="progress-percent" id="progressPercent">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- لوحة Kanban -->
         <div class="board">
             <div class="column" 
                  id="column-todo"

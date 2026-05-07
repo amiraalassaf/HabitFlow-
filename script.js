@@ -2,7 +2,6 @@ let habits = [];
 let selectedColor = '#FF6B6B';
 let draggedHabitId = null;
 
-// ========== Toast ==========
 function showWipToast() {
     let toast = document.getElementById('wipToast');
     if (!toast) {
@@ -24,7 +23,6 @@ function showWipToast() {
     setTimeout(() => toast.style.opacity = '0', 3000);
 }
 
-// ========== localStorage ==========
 function saveToLocalStorage() {
     localStorage.setItem('habits', JSON.stringify(habits));
 }
@@ -37,7 +35,22 @@ function loadFromLocalStorage() {
     }
 }
 
-// ========== منتقي الألوان ==========
+// ========== تحديث الإحصائيات (جديد) ==========
+function updateStats() {
+    const total = habits.length;
+    const done = habits.filter(h => h.status === 'done').length;
+    const progress = habits.filter(h => h.status === 'progress').length;
+    const todo = habits.filter(h => h.status === 'todo').length;
+    const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+    
+    document.getElementById('totalCount').textContent = total;
+    document.getElementById('doneCount').textContent = done;
+    document.getElementById('progressCount').textContent = progress;
+    document.getElementById('todoCount').textContent = todo;
+    document.getElementById('progressBar').style.width = `${percent}%`;
+    document.getElementById('progressPercent').textContent = `${percent}%`;
+}
+
 function initColorPicker() {
     const colors = document.querySelectorAll('.color-option');
     colors.forEach(color => {
@@ -50,7 +63,6 @@ function initColorPicker() {
     if (colors.length > 0) colors[0].classList.add('selected');
 }
 
-// ========== إضافة عادة ==========
 function addHabit() {
     const name = document.getElementById('habitName').value.trim();
     const frequency = document.getElementById('habitFrequency').value;
@@ -73,7 +85,6 @@ function addHabit() {
     renderHabits();
 }
 
-// ========== Drag & Drop مع WIP Limit ==========
 function dragStart(event, habitId) {
     draggedHabitId = habitId;
     event.dataTransfer.setData('text/plain', habitId);
@@ -97,7 +108,6 @@ function drop(event, newStatus) {
     
     const habit = habits.find(h => h.id == habitId);
     if (habit) {
-        // WIP Limit: منع النقل إلى IN PROGRESS إذا كان العدد 3
         if (newStatus === 'progress' && habit.status !== 'progress') {
             const progressCount = habits.filter(h => h.status === 'progress').length;
             if (progressCount >= 3) {
@@ -115,7 +125,6 @@ function drop(event, newStatus) {
     draggedHabitId = null;
 }
 
-// ========== عرض العادات ==========
 function renderHabits() {
     const todoHabits = habits.filter(h => h.status === 'todo');
     const progressHabits = habits.filter(h => h.status === 'progress');
@@ -156,9 +165,11 @@ function renderHabits() {
             <div class="card-freq">${habit.frequency === 'يومي' ? '📅 يومي' : '📆 أسبوعي'}</div>
         </div>
     `).join('');
+    
+    // تحديث الإحصائيات
+    updateStats();
 }
 
-// ========== التهيئة ==========
 document.getElementById('saveBtn').addEventListener('click', addHabit);
 document.getElementById('habitName').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') addHabit();
