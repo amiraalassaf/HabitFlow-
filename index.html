@@ -2,35 +2,41 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HabitFlow - الإحصائيات</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>HabitFlow - متتبع العادات</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h1>🎯 HabitFlow - إدارة العادات</h1>
 
-        <!-- نموذج الإضافة -->
+        <!-- ========== تاسك 1: نموذج إضافة عادة جديدة ========== -->
         <div class="form-section">
             <h2>➕ إضافة عادة جديدة</h2>
             <div class="form-group">
-                <input type="text" id="habitName" placeholder="اسم العادة">
+                <input type="text" id="habitName" placeholder="اسم العادة (مثال: القراءة)">
+                
                 <select id="habitFrequency">
                     <option value="يومي">📅 يومي</option>
                     <option value="أسبوعي">📆 أسبوعي</option>
                 </select>
+
+                <!-- منتقي الألوان -->
                 <div class="color-picker" id="colorPicker">
                     <span class="color-option" data-color="#FF6B6B" style="background:#FF6B6B"></span>
                     <span class="color-option" data-color="#4ECDC4" style="background:#4ECDC4"></span>
                     <span class="color-option" data-color="#FFE66D" style="background:#FFE66D"></span>
                     <span class="color-option" data-color="#95E1D3" style="background:#95E1D3"></span>
                     <span class="color-option" data-color="#FF8C42" style="background:#FF8C42"></span>
+                    <span class="color-option" data-color="#A855F7" style="background:#A855F7"></span>
+                    <span class="color-option" data-color="#06B6D4" style="background:#06B6D4"></span>
                 </div>
+
                 <button id="saveBtn">✅ حفظ العادة</button>
             </div>
         </div>
 
-        <!-- قسم الإحصائيات (جديد) -->
+        <!-- ========== تاسك 5: قسم الإحصائيات وشريط التقدم ========== -->
         <div class="stats-section">
             <div class="stats-cards">
                 <div class="stat-card">
@@ -58,33 +64,52 @@
             </div>
         </div>
 
-        <!-- لوحة Kanban -->
+        <!-- ========== تاسك 2: لوحة Kanban مع Drag & Drop و WIP Limit ========== -->
         <div class="board">
+            <!-- عمود TO DO -->
             <div class="column" 
                  id="column-todo"
                  ondragover="allowDrop(event)"
                  ondrop="drop(event, 'todo')">
-                <h3>📝 مطلوب (TO DO)</h3>
+                <div class="column-header">
+                    <span class="column-icon">📝</span>
+                    <h3>مطلوب (TO DO)</h3>
+                    <span class="column-count" id="todoCountBadge">0</span>
+                </div>
                 <div class="cards" id="cardsTodo"></div>
             </div>
 
+            <!-- عمود IN PROGRESS مع عرض WIP Limit -->
             <div class="column" 
                  id="column-progress"
                  ondragover="allowDrop(event)"
                  ondrop="drop(event, 'progress')">
-                <h3>⏳ قيد التنفيذ (IN PROGRESS)</h3>
+                <div class="column-header">
+                    <span class="column-icon">⏳</span>
+                    <h3>قيد التنفيذ (IN PROGRESS)</h3>
+                    <span class="column-count" id="progressCountBadge">0</span>
+                    <span class="wip-badge">حد أقصى 3</span>
+                </div>
                 <div class="cards" id="cardsProgress"></div>
             </div>
 
+            <!-- عمود DONE -->
             <div class="column" 
                  id="column-done"
                  ondragover="allowDrop(event)"
                  ondrop="drop(event, 'done')">
-                <h3>✅ منجز (DONE)</h3>
+                <div class="column-header">
+                    <span class="column-icon">✅</span>
+                    <h3>منجز (DONE)</h3>
+                    <span class="column-count" id="doneCountBadge">0</span>
+                </div>
                 <div class="cards" id="cardsDone"></div>
             </div>
         </div>
     </div>
+
+    <!-- ========== تاسك 4: Toast رسالة الخطأ عند تجاوز WIP Limit ========== -->
+    <div id="wipToast" class="toast">⚠️ لا يمكن إضافة أكثر من 3 عادات في قيد التنفيذ!</div>
 
     <script src="script.js"></script>
 </body>
