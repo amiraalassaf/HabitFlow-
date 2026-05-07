@@ -3,24 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HabitFlow - إضافة عادة</title>
+    <title>HabitFlow - Drag & Drop</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h1>🎯 HabitFlow - إدارة العادات</h1>
 
-        <!-- نموذج إضافة عادة -->
         <div class="form-section">
             <h2>➕ إضافة عادة جديدة</h2>
             <div class="form-group">
-                <input type="text" id="habitName" placeholder="اسم العادة (مثال: القراءة)">
-                
+                <input type="text" id="habitName" placeholder="اسم العادة">
                 <select id="habitFrequency">
                     <option value="يومي">📅 يومي</option>
                     <option value="أسبوعي">📆 أسبوعي</option>
                 </select>
-
                 <div class="color-picker" id="colorPicker">
                     <span class="color-option" data-color="#FF6B6B" style="background:#FF6B6B"></span>
                     <span class="color-option" data-color="#4ECDC4" style="background:#4ECDC4"></span>
@@ -28,24 +25,32 @@
                     <span class="color-option" data-color="#95E1D3" style="background:#95E1D3"></span>
                     <span class="color-option" data-color="#FF8C42" style="background:#FF8C42"></span>
                 </div>
-
                 <button id="saveBtn">✅ حفظ العادة</button>
             </div>
         </div>
 
-        <!-- لوحة Kanban -->
+        <!-- لوحة Kanaban مع إضافة أحداث السحب والإفلات -->
         <div class="board">
-            <div class="column">
+            <div class="column" 
+                 id="column-todo"
+                 ondragover="allowDrop(event)"
+                 ondrop="drop(event, 'todo')">
                 <h3>📝 مطلوب (TO DO)</h3>
                 <div class="cards" id="cardsTodo"></div>
             </div>
 
-            <div class="column">
+            <div class="column" 
+                 id="column-progress"
+                 ondragover="allowDrop(event)"
+                 ondrop="drop(event, 'progress')">
                 <h3>⏳ قيد التنفيذ (IN PROGRESS)</h3>
                 <div class="cards" id="cardsProgress"></div>
             </div>
 
-            <div class="column">
+            <div class="column" 
+                 id="column-done"
+                 ondragover="allowDrop(event)"
+                 ondrop="drop(event, 'done')">
                 <h3>✅ منجز (DONE)</h3>
                 <div class="cards" id="cardsDone"></div>
             </div>
