@@ -2,6 +2,42 @@ let habits = [];
 let selectedColor = '#FF6B6B';
 let draggedHabitId = null;
 
+// ========== Toast ==========
+function showWipToast() {
+    let toast = document.getElementById('wipToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'wipToast';
+        toast.style.cssText = `
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%);
+            background: #ff4757; color: white;
+            padding: 12px 24px; border-radius: 10px;
+            font-weight: bold; z-index: 1000;
+            opacity: 0; transition: opacity 0.3s;
+            pointer-events: none;
+        `;
+        toast.textContent = '⚠️ لا يمكن إضافة أكثر من 3 عادات في قيد التنفيذ!';
+        document.body.appendChild(toast);
+    }
+    toast.style.opacity = '1';
+    setTimeout(() => toast.style.opacity = '0', 3000);
+}
+
+// ========== localStorage ==========
+function saveToLocalStorage() {
+    localStorage.setItem('habits', JSON.stringify(habits));
+}
+
+function loadFromLocalStorage() {
+    const stored = localStorage.getItem('habits');
+    if (stored) {
+        habits = JSON.parse(stored);
+        renderHabits();
+    }
+}
+
+// ========== منتقي الألوان ==========
 function initColorPicker() {
     const colors = document.querySelectorAll('.color-option');
     colors.forEach(color => {
@@ -14,6 +50,7 @@ function initColorPicker() {
     if (colors.length > 0) colors[0].classList.add('selected');
 }
 
+// ========== إضافة عادة ==========
 function addHabit() {
     const name = document.getElementById('habitName').value.trim();
     const frequency = document.getElementById('habitFrequency').value;
@@ -32,10 +69,11 @@ function addHabit() {
     });
     
     document.getElementById('habitName').value = '';
+    saveToLocalStorage();
     renderHabits();
 }
 
-// دوال Drag & Drop
+// ========== Drag & Drop مع WIP Limit ==========
 function dragStart(event, habitId) {
     draggedHabitId = habitId;
     event.dataTransfer.setData('text/plain', habitId);
@@ -59,13 +97,25 @@ function drop(event, newStatus) {
     
     const habit = habits.find(h => h.id == habitId);
     if (habit) {
+        // WIP Limit: منع النقل إلى IN PROGRESS إذا كان العدد 3
+        if (newStatus === 'progress' && habit.status !== 'progress') {
+            const progressCount = habits.filter(h => h.status === 'progress').length;
+            if (progressCount >= 3) {
+                showWipToast();
+                draggedHabitId = null;
+                return;
+            }
+        }
+        
         habit.status = newStatus;
+        saveToLocalStorage();
         renderHabits();
     }
     
     draggedHabitId = null;
 }
 
+// ========== عرض العادات ==========
 function renderHabits() {
     const todoHabits = habits.filter(h => h.status === 'todo');
     const progressHabits = habits.filter(h => h.status === 'progress');
@@ -108,10 +158,11 @@ function renderHabits() {
     `).join('');
 }
 
+// ========== التهيئة ==========
 document.getElementById('saveBtn').addEventListener('click', addHabit);
 document.getElementById('habitName').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') addHabit();
 });
 
 initColorPicker();
-renderHabits();
+loadFromLocalStorage();
